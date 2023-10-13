@@ -23,7 +23,7 @@ class MoneyTransferTest {
     var authInfo = DataHelper.getAuthInfo();
     var verificationPage = loginPage.validLogin(authInfo);
     var verificationCode = getVerificationCodeFor();
-    verificationPage.validVerify(verificationCode);
+    dashboardPage = verificationPage.validVerify(verificationCode);
     firstCardInfo = getFirstCardInfo();
     secondCardInfo = getSecondCardInfo();
   }
@@ -41,6 +41,20 @@ class MoneyTransferTest {
     var actualBalanceSecondCard = dashboardPage.getCardBalance(secondCardInfo);
     assertEquals(expectedBalanceFirstCard, actualBalanceFirstCard);
     assertEquals(expectedBalanceSecondCard, actualBalanceSecondCard);
+  }
+
+  @Test
+  void shouldGetErrorMessageIfTransferMoreBalance() {
+    var firstCardBalance = dashboardPage.getCardBalance(firstCardInfo);
+    var secondCardBalance = dashboardPage.getCardBalance(secondCardInfo);
+    var amount = generateInValidAmount(secondCardBalance);
+    var transferPage = dashboardPage.selectCardToTransfer(firstCardInfo);
+    transferPage.makeTransfer(String.valueOf(amount), secondCardInfo);
+    transferPage.findErrorMessage("Перевод не выполнен, сумма перевода превышает остаток на карте списания");
+    var actualBalanceFirstCard = dashboardPage.getCardBalance(firstCardInfo);
+    var actualBalanceSecondCard = dashboardPage.getCardBalance(secondCardBalance);
+    assertEquals(firstCardBalance, actualBalanceFirstCard);
+    assertEquals(secondCardBalance, actualBalanceSecondCard);
   }
 }
 
